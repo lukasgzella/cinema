@@ -1,41 +1,77 @@
 package cinema;
 
-import java.util.List;
+import java.util.*;
+
 public class Room {
-    private int totalRows;
-    private int totalColumns;
-    private List<Seat> availableSeats;
+    private final int totalRows = 9;
+    private final int totalColumns = 9;
+    private Set<Seat> availableSeats = new LinkedHashSet<>();
+//    private Set<Token> purshasedSeats = new LinkedHashSet<>();
 
     public Room() {
+        for (int row = 1; row <= totalRows; row++) {
+            for (int column = 1; column <= totalColumns; column++) {
+                if (row <= 4) {
+                    availableSeats.add(new Seat(row, column, 10));
+                } else {
+                    availableSeats.add(new Seat(row, column, 8));
+                }
+            }
+        }
     }
 
-    public Room(int totalRows, int totalColumns, List<Seat> availableSeats) {
-        this.totalRows = totalRows;
-        this.totalColumns = totalColumns;
-        this.availableSeats = availableSeats;
+    public void removeSeatFromAvailableWithParams (int row, int column) {
+        if (row <= 4) {
+            this.availableSeats.remove(new Seat(row, column, 10));
+        } else {
+            this.availableSeats.remove(new Seat(row, column, 8));
+        }
+    }
+    public boolean isAvailable(Seat seat) {
+        int row = seat.getRow();
+        int column = seat.getColumn();
+        return availableSeats.contains(new Seat(row, column, 8))
+                || availableSeats.contains(new Seat(row, column, 10));
+    }
+    public boolean isSeatValid(Seat seat) {
+        return seat.getRow() > 0 && seat.getRow() <= totalRows
+                && seat.getColumn() > 0 && seat.getColumn() <= totalColumns;
+    }
+
+    public Seat removeSeatFromAvailableWithBody (Seat seat) {
+        if (seat.getRow() <= 4) {
+            Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 10);
+            this.availableSeats.remove(removingSeat);
+            return removingSeat;
+        } else {
+            Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 8);
+            this.availableSeats.remove(removingSeat);
+            return removingSeat;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Room {" +
+                "totalRows = " + totalRows +
+                ", totalColumns = " + totalColumns +
+                ",\navailableSeats = " + availableSeats +
+                '}';
     }
 
     public int getTotalRows() {
         return totalRows;
     }
 
-    public void setTotalRows(int totalRows) {
-        this.totalRows = totalRows;
-    }
-
     public int getTotalColumns() {
         return totalColumns;
     }
 
-    public void setTotalColumns(int totalColumns) {
-        this.totalColumns = totalColumns;
-    }
-
-    public List<Seat> getAvailableSeats() {
+    public Set<Seat> getAvailableSeats() {
         return availableSeats;
     }
 
-    public void setAvailableSeats(List<Seat> availableSeats) {
+    public void setAvailableSeats(Set<Seat> availableSeats) {
         this.availableSeats = availableSeats;
     }
 }
