@@ -1,12 +1,16 @@
 package cinema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.*;
 
 public class Room {
     private final int totalRows = 9;
     private final int totalColumns = 9;
     private Set<Seat> availableSeats = new LinkedHashSet<>();
-//    private Set<Token> purshasedSeats = new LinkedHashSet<>();
+    @JsonIgnore
+    private Map<String, Seat> purchasedSeats = new HashMap<>();
 
     public Room() {
         for (int row = 1; row <= totalRows; row++) {
@@ -20,42 +24,47 @@ public class Room {
         }
     }
 
-    public void removeSeatFromAvailableWithParams (int row, int column) {
-        if (row <= 4) {
-            this.availableSeats.remove(new Seat(row, column, 10));
-        } else {
-            this.availableSeats.remove(new Seat(row, column, 8));
-        }
-    }
     public boolean isAvailable(Seat seat) {
         int row = seat.getRow();
         int column = seat.getColumn();
         return availableSeats.contains(new Seat(row, column, 8))
                 || availableSeats.contains(new Seat(row, column, 10));
     }
+
     public boolean isSeatValid(Seat seat) {
         return seat.getRow() > 0 && seat.getRow() <= totalRows
                 && seat.getColumn() > 0 && seat.getColumn() <= totalColumns;
     }
 
-    public Seat removeSeatFromAvailableWithBody (Seat seat) {
+    public Token removeSeatFromAvailable(Seat seat) {
         if (seat.getRow() <= 4) {
             Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 10);
             this.availableSeats.remove(removingSeat);
-            return removingSeat;
+            Token createdToken = new Token(removingSeat);
+            this.purchasedSeats.put(createdToken.getTokenValue(), removingSeat);
+            return createdToken;
         } else {
             Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 8);
             this.availableSeats.remove(removingSeat);
-            return removingSeat;
+            Token createdToken = new Token(removingSeat);
+            this.purchasedSeats.put(createdToken.getTokenValue(), removingSeat);
+            return createdToken;
         }
+    }
+
+    public Seat removeSeatFromPurchased(TokenRequest tokenRequest) {
+        Seat returnedSeat = purchasedSeats.remove(tokenRequest.getToken());
+        availableSeats.add(returnedSeat);
+        return returnedSeat;
     }
 
     @Override
     public String toString() {
-        return "Room {" +
-                "totalRows = " + totalRows +
-                ", totalColumns = " + totalColumns +
-                ",\navailableSeats = " + availableSeats +
+        return "Room{" +
+                "totalRows=" + totalRows +
+                ", totalColumns=" + totalColumns +
+                ", availableSeats=" + availableSeats +
+                ", purchasedSeats=" + purchasedSeats +
                 '}';
     }
 
@@ -73,5 +82,13 @@ public class Room {
 
     public void setAvailableSeats(Set<Seat> availableSeats) {
         this.availableSeats = availableSeats;
+    }
+
+    public Map<String, Seat> getPurchasedSeats() {
+        return purchasedSeats;
+    }
+
+    public void setPurchasedSeats(Map<String, Seat> purchasedSeats) {
+        this.purchasedSeats = purchasedSeats;
     }
 }
