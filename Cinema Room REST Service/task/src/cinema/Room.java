@@ -1,7 +1,6 @@
 package cinema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.*;
 
@@ -11,6 +10,8 @@ public class Room {
     private Set<Seat> availableSeats = new LinkedHashSet<>();
     @JsonIgnore
     private Map<String, Seat> purchasedSeats = new HashMap<>();
+    @JsonIgnore
+    private int currentIncome = 0;
 
     public Room() {
         for (int row = 1; row <= totalRows; row++) {
@@ -40,12 +41,16 @@ public class Room {
         if (seat.getRow() <= 4) {
             Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 10);
             this.availableSeats.remove(removingSeat);
+            this.currentIncome += removingSeat.getPrice();
+
             Token createdToken = new Token(removingSeat);
             this.purchasedSeats.put(createdToken.getTokenValue(), removingSeat);
             return createdToken;
         } else {
             Seat removingSeat = new Seat(seat.getRow(), seat.getColumn(), 8);
             this.availableSeats.remove(removingSeat);
+            this.currentIncome += removingSeat.getPrice();
+
             Token createdToken = new Token(removingSeat);
             this.purchasedSeats.put(createdToken.getTokenValue(), removingSeat);
             return createdToken;
@@ -55,17 +60,17 @@ public class Room {
     public Seat removeSeatFromPurchased(TokenRequest tokenRequest) {
         Seat returnedSeat = purchasedSeats.remove(tokenRequest.getToken());
         availableSeats.add(returnedSeat);
+        this.currentIncome -= returnedSeat.getPrice();
+
         return returnedSeat;
     }
 
-    @Override
-    public String toString() {
-        return "Room{" +
-                "totalRows=" + totalRows +
-                ", totalColumns=" + totalColumns +
-                ", availableSeats=" + availableSeats +
-                ", purchasedSeats=" + purchasedSeats +
-                '}';
+    public int getCurrentIncome() {
+        return currentIncome;
+    }
+
+    public void setCurrentIncome(int currentIncome) {
+        this.currentIncome = currentIncome;
     }
 
     public int getTotalRows() {
